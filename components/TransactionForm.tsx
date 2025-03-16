@@ -11,13 +11,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Category, Transaction } from "@/lib/types";
 
 const transactionSchema = z.object({
-  amount: z.string().min(1, "Amount is required").transform((val) => {
-    const amount = Number(val);
-    return amount > 0 ? -amount : amount;
-  }),
+  amount: z
+    .string()
+    .min(1, "Amount is required")
+    .transform((val) => {
+      const amount = Number(val);
+      return isNaN(amount) ? 0 : amount > 0 ? -amount : amount; // Ensure negative values
+    }),
   date: z.string().min(1, "Date is required"),
   description: z.string().min(3, "Description must be at least 3 characters"),
-  category: z.nativeEnum(Category)
+  category: z.nativeEnum(Category),
 });
 
 interface TransactionFormProps {
@@ -29,17 +32,17 @@ export default function TransactionForm({ onSubmit, initialData }: TransactionFo
   const form = useForm<z.infer<typeof transactionSchema>>({
     resolver: zodResolver(transactionSchema),
     defaultValues: initialData || {
-      amount: "",
+      amount: 0, // Fix: Use a number instead of an empty string
       date: new Date().toISOString().split("T")[0],
       description: "",
-      category: Category.OTHER
-    }
+      category: Category.OTHER,
+    },
   });
 
   const handleSubmit = (values: z.infer<typeof transactionSchema>) => {
     onSubmit({
       id: initialData?.id || Date.now().toString(),
-      ...values
+      ...values,
     });
     form.reset();
   };
@@ -59,12 +62,14 @@ export default function TransactionForm({ onSubmit, initialData }: TransactionFo
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                       $
                     </span>
-                    <Input 
-                      type="number" 
-                      step="0.01" 
-                      placeholder="0.00" 
-                      className="pl-7" 
-                      {...field} 
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      className="pl-7"
+                      {...field}
+                      value={field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </div>
                 </FormControl>

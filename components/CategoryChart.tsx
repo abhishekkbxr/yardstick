@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { Transaction, Category, Budget, CategorySummary } from "@/lib/types";
 import {
@@ -97,14 +97,19 @@ export function CategoryChart({ transactions }: CategoryChartProps) {
             <div className="flex justify-between text-sm">
               <span>{summary.category}</span>
               <span className="text-muted-foreground">
-                ${summary.spent.toFixed(2)} / ${summary.budget.toFixed(2)}
+              ₹{summary.spent.toFixed(2)} / ₹{summary.budget.toFixed(2)}
               </span>
             </div>
-            <Progress
-              value={summary.percentage}
-              className="h-2"
-              indicatorClassName={`bg-[${COLORS[index % COLORS.length]}]`}
-            />
+            {/* Custom Progress Bar with Dynamic Color */}
+            <div className="relative w-full h-2 bg-gray-200 rounded">
+              <span
+                className="absolute top-0 left-0 h-full rounded transition-all"
+                style={{
+                  width: `${summary.percentage}%`,
+                  backgroundColor: COLORS[index % COLORS.length],
+                }}
+              />
+            </div>
             {summary.percentage > 90 && (
               <p className="text-xs text-red-500">
                 Warning: Near or exceeding budget
